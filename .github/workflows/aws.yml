@@ -1,3 +1,74 @@
+import pygame
+import sys
+
+# 初始化Pygame
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("火柴人动画")
+clock = pygame.time.Clock()
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+
+# 火柴人初始状态
+stickman_pos = (400, 400)
+is_shooting = False
+is_dead = False
+shoot_time = 0
+
+def draw_stickman(pos, dead):
+    x, y = pos
+    if dead:
+        # 死亡姿态（倾斜+红色血迹）
+        pygame.draw.line(screen, BLACK, (x, y), (x-30, y+50), 3)  # 身体
+        pygame.draw.circle(screen, BLACK, (x, y-20), 15)  # 头
+        pygame.draw.line(screen, RED, (x-10, y+10), (x-40, y+30), 2)  # 血迹
+    else:
+        # 站立姿态
+        pygame.draw.circle(screen, BLACK, (x, y-20), 15)  # 头
+        pygame.draw.line(screen, BLACK, (x, y), (x, y+60), 3)  # 身体
+        pygame.draw.line(screen, BLACK, (x, y+20), (x-30, y+50), 3)  # 左腿
+        pygame.draw.line(screen, BLACK, (x, y+20), (x+30, y+50), 3)  # 右腿
+        pygame.draw.line(screen, BLACK, (x, y+10), (x-30, y-10), 3)  # 左臂
+        pygame.draw.line(screen, BLACK, (x, y+10), (x+30, y-10), 3)  # 右臂
+
+def draw_ak(pos):
+    # 绘制AK（简化版）
+    x, y = pos
+    pygame.draw.rect(screen, BLACK, (x-20, y-10, 40, 10))  # 枪身
+    pygame.draw.line(screen, BLACK, (x+20, y-5), (x+50, y-5), 2)  # 枪管
+
+# 主循环
+running = True
+while running:
+    screen.fill(WHITE)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and not is_shooting:
+            is_shooting = True
+            shoot_time = pygame.time.get_ticks()
+
+    # 绘制AK（固定在左侧）
+    draw_ak((100, 400))
+
+    # 射击逻辑
+    if is_shooting:
+        # 绘制子弹轨迹
+        pygame.draw.line(screen, RED, (150, 395), stickman_pos, 2)
+        # 1秒后火柴人死亡
+        if pygame.time.get_ticks() - shoot_time > 1000:
+            is_dead = True
+            is_shooting = False
+
+    # 绘制火柴人
+    draw_stickman(stickman_pos, is_dead)
+
+    pygame.display.flip()
+    clock.tick(30)
+
+pygame.quit()
+sys.exit()
 # This workflow will build and push a new container image to Amazon ECR,
 # and then will deploy a new task definition to Amazon ECS, when there is a push to the "main" branch.
 #
